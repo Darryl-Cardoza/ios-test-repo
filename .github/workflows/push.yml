@@ -1,0 +1,62 @@
+name: iOS CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: write
+  pull-requests: read
+  actions: read
+
+jobs:
+  extract-version:
+    name: Extract App Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: v
+        run: |
+          # Example: read MARKETING_VERSION from xcodebuild settings
+          # Customize as needed (workspace/project + scheme)
+          VERSION=$(xcodebuild -showBuildSettings \
+            -scheme "TestApp" \
+            | awk -F' = ' '/MARKETING_VERSION/ {print $2; exit}')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Extracted version: $VERSION"
+
+  call-ci:
+    name: Call Reusable iOS CI
+    needs: extract-version
+    uses: ./.github/workflows/ios-ci.yml
+    with:
+      scheme: "TestApp"
+      workspace: "TestApp.xcworkspace"
+      configuration: "Release"
+      coverage_threshold: "75.00"
+      build_archive: true
+
+  call-cd:
+    name: Call Reusable iOS CD
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [extract-version, call-ci]
+    uses: ./.github/workflows/ios-cd.yml
+    with:
+      version: ${{ needs.extract-version.outputs.version }}
+      deploy_to_testflight: true
+      ios_bundle_id: "app.devops.test"
+      enable_whats_new: true
+      whats_new_file: release_notes/${{ needs.extract-version.outputs.version }}.txt
+    secrets:
+      IOS_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      IOS_CERT_P12_BASE64: ${{ secrets.IOS_CERT_P12_BASE64 }}
+      IOS_CERT_PASSWORD: ${{ secrets.IOS_CERT_PASSWORD }}
+      IOS_PROVISION_PROFILE_BASE64: ${{ secrets.IOS_PROVISION_PROFILE_BASE64 }}
+
+      APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+      APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+      APPSTORE_PRIVATE_KEY: ${{ secrets.APPSTORE_PRIVATE_KEY }}
