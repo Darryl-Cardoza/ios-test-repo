@@ -14,7 +14,7 @@ permissions:
 jobs:
   extract-version:
     name: Extract App Version
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     outputs:
       version: ${{ steps.v.outputs.version }}
     steps:
