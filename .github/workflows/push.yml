@@ -23,18 +23,19 @@ jobs:
       - id: v
         run: |
           set -euo pipefail
-
+  
           VERSION=$(xcodebuild -showBuildSettings \
-            -workspace "TestApp.xcworkspace" \
-            -scheme "TestApp" \
-            -configuration Release \
-            | awk -F' = ' '/MARKETING_VERSION/ {print $2; exit}')
-
+          -workspace "TestApp.xcworkspace" \
+          -scheme "TestApp" \
+          -configuration Release \
+          -sdk iphoneos \
+          | awk -F' = ' '/MARKETING_VERSION/ {print $2; exit}')
+          
           if [ -z "$VERSION" ]; then
-            echo "❌ MARKETING_VERSION not found"
-            exit 1
+          echo "❌ MARKETING_VERSION not found"
+          exit 1
           fi
-
+          
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Extracted version: $VERSION"
 
