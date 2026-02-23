@@ -19,23 +19,13 @@ jobs:
       version: ${{ steps.v.outputs.version }}
     steps:
       - uses: actions/checkout@v4
-
       - id: v
         run: |
-          set -euo pipefail
-  
+          # Example: read MARKETING_VERSION from xcodebuild settings
+          # Customize as needed (workspace/project + scheme)
           VERSION=$(xcodebuild -showBuildSettings \
-          -workspace "TestApp.xcworkspace" \
-          -scheme "TestApp" \
-          -configuration Release \
-          -sdk iphoneos \
-          | awk -F' = ' '/MARKETING_VERSION/ {print $2; exit}')
-          
-          if [ -z "$VERSION" ]; then
-          echo "❌ MARKETING_VERSION not found"
-          exit 1
-          fi
-          
+            -scheme "TestApp" \
+            | awk -F' = ' '/MARKETING_VERSION/ {print $2; exit}')
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Extracted version: $VERSION"
 
