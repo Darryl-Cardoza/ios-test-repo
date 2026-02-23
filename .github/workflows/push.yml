@@ -64,7 +64,7 @@ jobs:
       deploy_to_testflight: true
       ios_bundle_id: "app.devops.test"
       enable_whats_new: true
-      whats_new_file: playstore/metadata/en-US/whatsnew-${{ needs.extract-version.outputs.version }}.txt
+      whats_new_file: playstore/metadata/en-US/whatsnew.txt
     secrets:
       IOS_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
       IOS_CERT_P12_BASE64: ${{ secrets.IOS_CERT_P12_BASE64 }}
