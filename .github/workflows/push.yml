@@ -23,12 +23,19 @@ jobs:
         run: |
           set -euo pipefail
   
+          PLIST_PATH="TestApp/TestApp/Resources/Info.plist"
+          
+          if [ ! -f "$PLIST_PATH" ]; then
+          echo "❌ Info.plist not found at $PLIST_PATH"
+          exit 1
+          fi
+          
           VERSION=$(/usr/libexec/PlistBuddy \
           -c "Print CFBundleShortVersionString" \
-          "TestApp/Info.plist")
+          "$PLIST_PATH")
           
           if [ -z "$VERSION" ]; then
-          echo "❌ Version not found in Info.plist"
+          echo "❌ CFBundleShortVersionString empty"
           exit 1
           fi
           
