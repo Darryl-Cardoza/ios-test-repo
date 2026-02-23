@@ -23,12 +23,14 @@ jobs:
         run: |
           set -euo pipefail
   
-          PLIST_PATH="TestApp/TestApp/Resources/Info.plist"
+          PLIST_PATH=$(find . -path "*/Resources/Info.plist" | head -n 1)
           
-          if [ ! -f "$PLIST_PATH" ]; then
-          echo "❌ Info.plist not found at $PLIST_PATH"
+          if [ -z "$PLIST_PATH" ]; then
+          echo "❌ Could not locate Info.plist"
           exit 1
           fi
+        
+          echo "Using plist at: $PLIST_PATH"
           
           VERSION=$(/usr/libexec/PlistBuddy \
           -c "Print CFBundleShortVersionString" \
